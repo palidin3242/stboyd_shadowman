@@ -1,0 +1,258 @@
+---
+- name: Gather hostnames
+  hosts: "{{ hosts }}"  # Replace this with the appropriate host group in your inventory
+  become: true
+
+  tasks:
+  
+    - name: Get hostname
+      shell: hostname -f
+      register: hostname_output
+      ignore_errors: yes
+
+    - name: Get uname
+      shell: uname -a
+      register: uname_output
+      ignore_errors: yes
+
+    - name: Get ipaddresses
+      shell: ip -4 -o addr show scope global | awk '{split($4,a,"/"); print a[1]}' | grep -v '[#]' | head -2 | tail -1
+      register: ipaddresses_output
+      ignore_errors: yes
+
+    - name: Get mac address
+      shell: ifconfig -a |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
+      register: mac_address_output
+      ignore_errors: yes
+
+    - name: Get name of package provided by redhat-release
+      shell: rpm -q --queryformat "%{NAME}\n" --whatprovides redhat-release
+      register: name_release_output
+      ignore_errors: yes
+
+    - name: Get release of package provided by redhat-release
+      shell: rpm -q --queryformat "%{RELEASE}\n" --whatprovides redhat-release
+      register: package_release_output
+      ignore_errors: yes
+
+    - name: Get version of package provided by redhat-release
+      shell: rpm -q --queryformat "%{VERSION}\n" --whatprovides redhat-release
+      register: version_release_output
+      ignore_errors: yes
+
+    - name: Get cores per socket
+      shell: cat /proc/cpuinfo 2>/dev/null | grep '^cpu cores\s*.' | sed -n -e 's/^.*cpu cores\s*.\s*//p' | uniq
+      register: core_per_socket_output
+      ignore_errors: yes
+
+    - name: Get number of processors
+      shell: cat /proc/cpuinfo 2>/dev/null | grep '^processor\s*.' | wc -l
+      register: num_processors_output
+      ignore_errors: yes
+
+    - name: Get cpu family
+      shell: cat /proc/cpuinfo 2>/dev/null | grep '^cpu family\s*.' | sed -n -e 's/^.*cpu family\s*.\s*//p' | uniq
+      register: cpu_family_output
+      ignore_errors: yes
+
+    - name: Get cpu is hyperthreaded
+      shell: cat /proc/cpuinfo 2>/dev/null | grep '^siblings\s*.' | sed -n -e 's/^.*siblings\s*.\s*//p' | uniq
+      register: hyperthread_output
+      ignore_errors: yes
+
+    - name: Get cpu model name
+      shell: cat /proc/cpuinfo 2>/dev/null | grep '^model name\s*.' | sed -n -e 's/^.*model name\s*.\s*//p' |uniq
+      register: cpu_model_output
+      ignore_errors: yes
+
+    - name: Get cpu model version
+      shell: cat /proc/cpuinfo 2>/dev/null | grep '^model\s*.' | sed -n -e 's/^.*model\s*.\s*//p' | sort | uniq
+      register: cpu_version_output
+      ignore_errors: yes
+
+    - name: Get cpu siblings
+      shell: cat /proc/cpuinfo 2>/dev/null | grep '^siblings\s*.' | sed -n -e 's/^.*siblings\s*.\s*//p' |uniq
+      register: cpu_siblings_output
+      ignore_errors: yes
+
+    - name: Get cpu vendor
+      shell: cat /proc/cpuinfo 2>/dev/null | grep '^vendor_id\s*' | sed -n -e 's/^.*vendor_id\s*.\s*//p' |uniq
+      register: cpu_vendor_output
+      ignore_errors: yes
+
+    - name: Get anaconda kickstart date
+      shell: ls --full-time /root/anaconda-ks.cfg 2>/dev/null | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}'
+      register: anaconda_output
+      ignore_errors: yes
+
+    - name: Get anaconda config last modified
+      shell: ls --full-time /root/anaconda-ks.cfg 2>/dev/null | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}'
+      register: anaconda_modified_output
+      ignore_errors: yes
+
+    - name: Get date
+      shell: date
+      register: date_output
+      ignore_errors: yes
+
+    - name: Get machine-id modified time
+      shell: if [ -f /etc/machine-id ] ; then ls --full-time /etc/machine-id 2>/dev/null | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}' ; fi
+      register: machine_id_mod_date_output
+      ignore_errors: yes
+
+    - name: Get yum history dates
+      shell: yum history 2>/dev/null  | tail -n 2 | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}'
+      register: yum_history_date_output
+      ignore_errors: yes
+
+    - name: Get date on etc
+      shell: ls -lact --full-time /etc |awk 'END {print $6}'
+      register: date_etc_dir_output
+      ignore_errors: yes
+
+    - name: Get bios vendor name
+      shell: /usr/sbin/dmidecode -s bios-vendor 2>/dev/null
+      register: bios_vendor_output
+      ignore_errors: yes
+
+    - name: Get uptime
+      shell: uptime -p
+      register: uptime_output
+      ignore_errors: yes
+
+    - name: Get redhat release
+      shell: cat /etc/redhat-release
+      register: redhat_release_output
+      ignore_errors: yes
+
+    - name: Get system release
+      shell: cat /etc/system-release
+      register: system_release_output
+      ignore_errors: yes
+
+    - name: Get kernel
+      shell: uname -r
+      register: kernel_output
+      ignore_errors: yes
+
+    - name: Get number of installed packages
+      shell: rpm -qa | wc -l
+      register: num_installed_pkgs_output
+      ignore_errors: yes
+
+    - name: Get number of Redhat Packages
+      shell: rpm -qa --qf "%{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig}\n" 2> /dev/null | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | wc -l
+      register: rh_pkgs_output
+      ignore_errors: yes
+
+    - name: Get last installed package by gpg key
+      shell: rpm -qa --qf "%{INSTALLTIME} %{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig} |%{NAME}-%{VERSION} Installed:%{INSTALLTIME:date}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | sort -nr | head -n 1 | cut -d"|" -f2
+      register: last_rh_pkg_install_date_output
+      ignore_errors: yes
+
+    - name: Get last built rh package by gpg key
+      shell: rpm -qa --qf "%{BUILDTIME} %{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig} |%{NAME}-%{VERSION} Built:%{BUILDTIME:date}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | sort -nr | head -n 1 | cut -d"|" -f2
+      register: last_built_rh_pkg_output
+      ignore_errors: yes
+
+    - name: Get rh product certs
+      shell: ls /etc/pki/product/ /etc/pki/product-default/ 2> /dev/null |grep '.pem' | sort -u | tr '\n' ';'
+      register: rh_prod_certs_output
+      ignore_errors: yes
+
+    - name: Check cpu model for QEMU
+      shell: model_name=$(cat /proc/cpuinfo 2>/dev/null | grep '^model name\s*:' | sed -n -e 's/^.*model name\s*:\s//p'); if [[ $model_name == *QEMU ]]; then echo "Y"; else echo "N"; fi
+      register: qemu_check_output
+      ignore_errors: yes
+
+    - name: Get DMI system product name
+      shell: /usr/sbin/dmidecode -t system 2>/dev/null | grep "Product Name"|awk '{print $3}'
+      register: dmi_product_output
+      ignore_errors: yes
+
+    - name: Get subman sku
+      shell: yum subscription-manager list --consumed 2>/dev/null | grep -e '^SKU' | sed -n -e 's/SKU\s*.\s*//p'
+      register: subman_sku_output
+      ignore_errors: yes
+
+    - name: Get subman name
+      shell: subscription-manager list --consumed 2>/dev/null | grep -e '^Subscription Name' | sed -n -e 's/Subscription Name\s*.\s*//p'
+      register: subman_subs_output
+      ignore_errors: yes
+
+    - name: Get subman cores per socket
+      shell: subscription-manager facts --list | grep '^cpu.core(s)_per_socket.'
+      register: subman_cores_output
+      ignore_errors: yes
+
+    - name: Get subman cpus
+      shell: subscription-manager facts --list | grep '^cpu.cpu(s).' | sed -n -e 's/^.*cpu.cpu(s).\s*//p'
+      register: subman_cpu_output
+      ignore_errors: yes
+
+    - name: Get subman cpu per socket
+      shell: subscription-manager facts --list | grep '^cpu.cpu_socket(s).'
+      register: subman_cpu_socket_output
+      ignore_errors: yes
+
+    - name: Get subman virt host type
+      shell: subscription-manager facts --list | grep '^virt.host_type.' | sed -n -e 's/^.*virt.host_type.\s*//p'
+      register: subman_virthost_output
+      ignore_errors: yes
+
+    - name: Get subman virt guest type
+      shell: subscription-manager facts --list | grep '^virt.is_guest.' | sed -n -e 's/^.*virt.is_guest.\s*//p'
+      register: subman_virtguest_output
+      ignore_errors: yes
+
+    - name: Get virt type
+      shell: virt-what
+      register: virt_type_output
+      ignore_errors: yes
+
+    - name: Save output to file
+      copy:
+        content: |
+          Hostname: {{ hostname_output.stdout }}
+          Uname: {{ uname_output.stdout }}
+          IP Addresses: {{ ipaddresses_output.stdout }}
+          MAC Address: {{ mac_address_output.stdout }}
+          Redhat Release Package Name: {{ name_release_output.stdout }}
+          Redhat Release Package Release: {{ package_release_output.stdout }}
+          Redhat Release Package Version: {{ version_release_output.stdout }}
+          Cores per Socket: {{ core_per_socket_output.stdout }}
+          Number of Processors: {{ num_processors_output.stdout }}
+          CPU Family: {{ cpu_family_output.stdout }}
+          CPU Hyperthreaded: {{ hyperthread_output.stdout }}
+          CPU Model Name: {{ cpu_model_output.stdout }}
+          CPU Model Version: {{ cpu_version_output.stdout }}
+          CPU Siblings: {{ cpu_siblings_output.stdout }}
+          CPU Vendor: {{ cpu_vendor_output.stdout }}
+          Anaconda Kickstart Date: {{ anaconda_output.stdout }}
+          Anaconda Config Last Modified: {{ anaconda_modified_output.stdout }}
+          Date: {{ date_output.stdout }}
+          Machine ID Modified Time: {{ machine_id_mod_date_output.stdout }}
+          Yum History Dates: {{ yum_history_date_output.stdout }}
+          Date on /etc Directory: {{ date_etc_dir_output.stdout }}
+          BIOS Vendor Name: {{ bios_vendor_output.stdout }}
+          Uptime: {{ uptime_output.stdout }}
+          Redhat Release: {{ redhat_release_output.stdout }}
+          System Release: {{ system_release_output.stdout }}
+          Kernel Version: {{ kernel_output.stdout }}
+          Number of Installed Packages: {{ num_installed_pkgs_output.stdout }}
+          Number of Redhat Packages: {{ rh_pkgs_output.stdout }}
+          Last Installed Redhat Package by GPG Key Date: {{ last_rh_pkg_install_date_output.stdout }}
+          Last Built Redhat Package by GPG Key Date: {{ last_built_rh_pkg_output.stdout }}
+          Redhat Product Certificates: {{ rh_prod_certs_output.stdout }}
+          QEMU Check Result: {{ qemu_check_output.stdout }}
+          DMI System Product Name: {{ dmi_product_output.stdout }}
+          Subscription-manager SKU: {{ subman_sku_output.stdout }}
+          Subscription-manager Subscription Name: {{ subman_subs_output.stdout }}
+          Subscription-manager Cores per Socket: {{ subman_cores_output.stdout }}
+          Subscription-manager CPUs: {{ subman_cpu_output.stdout }}
+          Subscription-manager CPU Sockets: {{ subman_cpu_socket_output }}
+          Subscription-manager Virt Host Type: {{ subman_virthost_output.stdout }}
+          Subscription-manager Virt Guest Type: {{ subman_virtguest_output.stdout }}
+          Virt Type: {{ virt_type_output.stdout }}
+        dest: "/home/ansible/{{ inventory_hostname }}_scan_output.txt"  # Replace with the desired output path
+      delegate_to: localhost
