@@ -299,8 +299,11 @@
         dest: "/home/{{ inventory_hostname }}_scan_output.txt"  # Replace with the desired output path
         
     - name: If JBOSS is present, send it to service now
-      ansible.builtin.debug:
-        msg: "JBOSS is here to stay"
+      servicenow.itsm.configuration_item:
+        name: "{{ inventory_hostname }}"
+        other:
+          u_jboss: true
+      delegate_to: localhost
       loop: 
         - "{{ jboss_jar_output.stdout }}"
         - "{{ jboss_2_output.stdout }}"
