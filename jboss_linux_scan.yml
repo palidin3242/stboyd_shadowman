@@ -297,3 +297,10 @@
           JBOSS 6 or 7 Present: {{ jboss_67_output.stdout }}
           JBOSS 2 Present: {{ jboss_2_output.stdout }}
         dest: "/home/{{ inventory_hostname }}_scan_output.txt"  # Replace with the desired output path
+
+    - name: If a registered output is not zero, send it to service now
+      ansible.builtin.debug:
+        msg: "JBOSS is here to stay"
+      when: item != "0"
+      loop: "{{ jboss_jar_output.stdout + jboss_2_output.stdout + jboss_45_output.stdout + jboss_67_output.stdout + jboss_packages_output.stdout + jboss_process_count_output.stdout
+        + jboss_processes_output.stdout |flatten(levels=1) }}"
