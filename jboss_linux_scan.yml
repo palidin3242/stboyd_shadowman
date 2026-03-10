@@ -309,5 +309,5 @@
         - "{{ jboss_packages_output }}"
         - "{{ jboss_process_count_output }}"
         - "{{ jboss_processes_output }}"
-      when: item | int(default=1) != 0
+      when: (item | trim | length > 0) and (item | int(default=1) != 0)
       
