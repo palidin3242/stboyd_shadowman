@@ -302,12 +302,13 @@
       ansible.builtin.debug:
         msg: "JBOSS is here to stay"
       loop: 
-        - "{{ jboss_jar_output }}"
-        - "{{ jboss_2_output }}"
-        - "{{ jboss_45_output }}"
-        - "{{ jboss_67_output }}"
-        - "{{ jboss_packages_output }}"
-        - "{{ jboss_process_count_output }}"
-        - "{{ jboss_processes_output }}"
+        - "{{ jboss_jar_output.stdout }}"
+        - "{{ jboss_2_output.stdout }}"
+        - "{{ jboss_45_output.stdout }}"
+        - "{{ jboss_67_output.stdout }}"
+        - "{{ jboss_packages_output.stdout }}"
+        - "{{ jboss_process_count_output.stdout }}"
+        - "{{ jboss_processes_output.stdout }}"
       when: (item | trim | length > 0) and (item | int(default=1) != 0)
+      ignore_errors: yes
       
