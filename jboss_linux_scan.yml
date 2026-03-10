@@ -300,7 +300,7 @@
         
     - name: If JBOSS is present, send it to service now
       servicenow.itsm.configuration_item:
-        name: "{{ inventory_hostname }}"
+        name: "{{ hosts }}"
         other:
           u_jboss: true
       delegate_to: localhost
