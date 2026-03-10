@@ -298,7 +298,7 @@
           JBOSS 2 Present: {{ jboss_2_output.stdout }}
         dest: "/home/{{ inventory_hostname }}_scan_output.txt"  # Replace with the desired output path
 
-    - name: If a registered output is not zero, send it to service now
+    - name: If JBOSS is present, send it to service now
       ansible.builtin.debug:
         msg: "JBOSS is here to stay"
       when: item != "0"
