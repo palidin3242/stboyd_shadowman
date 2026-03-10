@@ -301,13 +301,13 @@
     - name: If JBOSS is present, send it to service now
       ansible.builtin.debug:
         msg: "JBOSS is here to stay"
-        loop: 
-          - "{{ jboss_jar_output }}"
-          - "{{ jboss_2_output }}"
-          - "{{ jboss_45_output }}"
-          - "{{ jboss_67_output }}"
-          - "{{ jboss_packages_output }}"
-          - "{{ jboss_process_count_output }}"
-          - "{{ jboss_processes_output }}"
+      loop: 
+        - "{{ jboss_jar_output }}"
+        - "{{ jboss_2_output }}"
+        - "{{ jboss_45_output }}"
+        - "{{ jboss_67_output }}"
+        - "{{ jboss_packages_output }}"
+        - "{{ jboss_process_count_output }}"
+        - "{{ jboss_processes_output }}"
       when: item | int(default=1) != 0
       
