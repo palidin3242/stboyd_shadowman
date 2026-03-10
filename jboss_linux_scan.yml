@@ -255,4 +255,3 @@
           Subscription-manager Virt Guest Type: {{ subman_virtguest_output.stdout }}
           Virt Type: {{ virt_type_output.stdout }}
         dest: "/home/{{ inventory_hostname }}_scan_output.txt"  # Replace with the desired output path
-      delegate_to: localhost
