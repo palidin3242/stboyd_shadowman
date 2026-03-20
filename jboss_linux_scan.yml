@@ -247,14 +247,15 @@
       ignore_errors: yes
 
     #- name: Get vSphere Guest Hostname
-    #  vmware.vmware.guest_info:
+      vmware.vmware.guest_info:
     #    hostname: "{{ VMWARE_HOST }}"
     #    username: "{{ VMWARE_USER }}"
     #    password: "{{ VMWARE_PASSWORD }}"
-    #    name: "{{ inventory_hostname }}"
-    #    validate_certs: false
-    #  register: vm_info
-    #  ignore_errors: yes
+        name: "{{ inventory_hostname }}"
+        validate_certs: false
+      register: vm_info
+      delegate_to: localhost
+      ignore_errors: yes
 
     - name: Save output to file
       copy:
@@ -310,8 +311,6 @@
           JBOSS 2 Present: {{ jboss_2_output.stdout }}
         dest: "/home/{{ inventory_hostname }}_scan_output.txt"
         mode: '0644'
-        delegate_to: localhost
-        ignore_errors: true
         
     - name: If JBOSS is present, send it to service now
       servicenow.itsm.configuration_item:
