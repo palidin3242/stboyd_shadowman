@@ -260,6 +260,12 @@
     - name: Save output to file
       copy:
         content: |
+          VMWare Hostname: {{ inventory_hostname }}
+          VMWare Datacenter: {{ vm_info.instance.hw_datacenter }}
+          Cluster: {{ vm_info.instance.hw_cluster | defualt('N/A) }}
+          ESXi Host: {{ vm_info.instance.hw_esxi_host | default('N/A') }}
+
+          
           Hostname: {{ hostname_output.stdout }}
           Uname: {{ uname_output.stdout }}
           IP Addresses: {{ ipaddresses_output.stdout }}
