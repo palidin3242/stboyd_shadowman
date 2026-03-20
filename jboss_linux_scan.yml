@@ -259,6 +259,7 @@
         name: "{{ inventory_hostname }}"
         validate_certs: false
       register: vm_info
+      ignore_errors: yes
 
     - name: Save output to file
       copy:
