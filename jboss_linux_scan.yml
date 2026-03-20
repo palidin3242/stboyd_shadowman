@@ -2,6 +2,12 @@
 - name: Gather hostnames
   hosts: "{{ hosts }}"  # Replace this with the appropriate host group in your inventory
   become: true
+  gather_facts: yes
+
+  vars:
+    vcenter_hostname: "{{ VMWARE_HOST }}"
+    vcenter_username: "{{ VMWARE_USER }}"
+    vcenter_password: "{{ VMWARE_PASSWORD }}"
 
   tasks:
   
@@ -245,9 +251,25 @@
       register: jboss_2_output
       ignore_errors: yes
 
+    - name: Get vSphere Guest Hostname
+      vmware.vmware.guest_info:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        name: "{{ inventory_hostname }}"
+        validate_certs: false
+      register: vm_info
+
     - name: Save output to file
       copy:
         content: |
+          Gathered on: {{ ansible_date_time.date }} {{ ansible_date_time.time ))
+          
+          VMWare Hostname: {{ inventory_hostname }}
+          VMWare Datacenter: {{ vm_info.instance.hw_datacenter }}
+          Cluster: {{ vm_info.instance.hw_cluster | defualt('N/A) }}
+          ESXi Host: {{ vm_info.instance.hw_esxi_host | default('N/A') }}
+          
           Hostname: {{ hostname_output.stdout }}
           Uname: {{ uname_output.stdout }}
           IP Addresses: {{ ipaddresses_output.stdout }}
@@ -289,6 +311,7 @@
           Subscription-manager Virt Host Type: {{ subman_virthost_output.stdout }}
           Subscription-manager Virt Guest Type: {{ subman_virtguest_output.stdout }}
           Virt Type: {{ virt_type_output.stdout }}
+          
           JBOSS .jar Modules: {{ jboss_jar_output.stdout }}
           JBOSS Packages: {{ jboss_packages_output.stdout }}
           JBOSS Process Count: {{ jboss_process_count_output.stdout }}
@@ -296,7 +319,8 @@
           JBOSS 4 or 5 Present: {{ jboss_45_output.stdout }}
           JBOSS 6 or 7 Present: {{ jboss_67_output.stdout }}
           JBOSS 2 Present: {{ jboss_2_output.stdout }}
-        dest: "/home/{{ inventory_hostname }}_scan_output.txt"  # Replace with the desired output path
+        dest: "/home/{{ inventory_hostname }}_scan_output.txt"
+        mode: '0644'
         
     - name: If JBOSS is present, send it to service now
       servicenow.itsm.configuration_item:
