@@ -221,11 +221,6 @@
       register: jboss_packages_output
       ignore_errors: yes
 
-    - name: JBOSS process count
-      shell: ps -A -o comm -o args e --columns 10000 | grep -i jboss |wc -l | grep -v "^jbossfinder"
-      register: jboss_process_count_output
-      ignore_errors: yes
-
     - name: JBOSS processes
       shell: ps -A -o comm -o args e --columns 10000 | grep -i jboss | grep -v grep | grep -v "^jbossfinder"
       register: jboss_processes_output
@@ -309,7 +304,6 @@
           
           JBOSS .jar Modules: {{ jboss_jar_output.stdout }}
           JBOSS Packages: {{ jboss_packages_output.stdout }}
-          JBOSS Process Count: {{ jboss_process_count_output.stdout }}
           JBOSS Processes: {{ jboss_processes_output.stdout }}
           JBOSS 4 or 5 Present: {{ jboss_45_output.stdout }}
           JBOSS 6 or 7 Present: {{ jboss_67_output.stdout }}
@@ -329,7 +323,6 @@
         - "{{ jboss_45_output.stdout }}"
         - "{{ jboss_67_output.stdout }}"
         - "{{ jboss_packages_output.stdout }}"
-        - "{{ jboss_process_count_output.stdout }}"
         - "{{ jboss_processes_output.stdout }}"
       when: (item | trim | length > 0) and (item | int(default=1) != 0)
       ignore_errors: yes
