@@ -261,9 +261,10 @@
       copy:
         content: |
           VMWare Hostname: {{ inventory_hostname }}
-          VMWare Datacenter: {{ vm_info.instance.hw_datacenter }}
-          Cluster: {{ vm_info.instance.hw_cluster | default('N/A') }}
-          ESXi Host: {{ vm_info.instance.hw_esxi_host | default('N/A') }}
+          VMWare Datacenter: {{ vm_info.guests[0].hw_folder | default('N/A') }}
+          Cluster: {{ vm_info.guests[0].hw_cluster | default('N/A') }}
+          ESXi Host: {{ vm_info.guests[0].hw_esxi_host | default('N/A') }}
+          
           Hostname: {{ hostname_output.stdout }}
           Uname: {{ uname_output.stdout }}
           IP Addresses: {{ ipaddresses_output.stdout }}
@@ -304,7 +305,8 @@
           Subscription-manager CPU Sockets: {{ subman_cpu_socket_output }}
           Subscription-manager Virt Host Type: {{ subman_virthost_output.stdout }}
           Subscription-manager Virt Guest Type: {{ subman_virtguest_output.stdout }}
-          Virt Type: {{ virt_type_output.stdout }}          
+          Virt Type: {{ virt_type_output.stdout }}
+          
           JBOSS .jar Modules: {{ jboss_jar_output.stdout }}
           JBOSS Packages: {{ jboss_packages_output.stdout }}
           JBOSS Process Count: {{ jboss_process_count_output.stdout }}
