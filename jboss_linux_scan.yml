@@ -317,6 +317,7 @@
           JBOSS 2 Present: {{ jboss_2_output.stdout }}
         dest: "/home/{{ inventory_hostname }}_scan_output.txt"
         mode: '0644'
+        delegate_to: localhost
         ignore_errors: true
         
     - name: If JBOSS is present, send it to service now
