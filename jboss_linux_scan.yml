@@ -259,8 +259,6 @@
     - name: Save output to file
       copy:
         content: |
-          Gathered on: {{ ansible_date_time.date }} {{ ansible_date_time.time )
-          
           Hostname: {{ hostname_output.stdout }}
           Uname: {{ uname_output.stdout }}
           IP Addresses: {{ ipaddresses_output.stdout }}
