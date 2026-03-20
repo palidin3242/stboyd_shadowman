@@ -21,7 +21,7 @@
       ignore_errors: yes
 
     - name: Get mac address
-      shell: ifconfig -a |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
+      shell: ip link show |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
       register: mac_address_output
       ignore_errors: yes
 
