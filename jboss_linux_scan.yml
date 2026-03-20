@@ -246,7 +246,7 @@
       register: jboss_2_output
       ignore_errors: yes
 
-    #- name: Get vSphere Guest Hostname
+    - name: Get vSphere Guest Hostname
       vmware.vmware.guest_info:
     #    hostname: "{{ VMWARE_HOST }}"
     #    username: "{{ VMWARE_USER }}"
