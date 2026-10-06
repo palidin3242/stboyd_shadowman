@@ -1,7 +1,8 @@
 ---
-hosts: all
+- name: touch a windows file
+  hosts: all
 
-tasks:
+  tasks:
   - name: Touch a file (creates if not present, updates modification time if present)
     ansible.windows.win_file:
       path: C:\Temp\foo.conf
