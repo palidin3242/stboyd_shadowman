@@ -1,6 +1,6 @@
 ---
 - name: Update Nginx configuration on web servers
-  hosts: webservers
+  hosts: all
   become: true
   serial: 1
   vars:
