@@ -1,5 +1,5 @@
 ---
-- name: Update Nginx configuration on web servers
+- name: Update Nginx configuration on all servers
   hosts: all
   become: true
   serial: 1
