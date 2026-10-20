@@ -1,0 +1,26 @@
+---
+- name: Update Nginx configuration on web servers
+  hosts: webservers
+  become: true
+  serial: 1
+  vars:
+    nginx_config_src: files/nginx.conf
+    nginx_config_dest: /etc/nginx/nginx.conf
+
+  tasks:
+    - name: Deploy Nginx configuration
+      ansible.builtin.copy:
+        src: "{{ nginx_config_src }}"
+        dest: "{{ nginx_config_dest }}"
+        owner: root
+        group: root
+        mode: "0644"
+        backup: true
+        validate: nginx -t -c %s
+      notify: Restart Nginx
+
+  handlers:
+    - name: Restart Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
