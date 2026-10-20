@@ -1,0 +1,47 @@
+---
+- name: Update nginx configuration on all inventory hosts
+  hosts: all
+  become: true
+  serial: 1
+  any_errors_fatal: true
+
+  vars:
+    nginx_config_src: files/nginx.config
+    nginx_config_dest: /etc/nginx/nginx.conf
+
+  pre_tasks:
+    - name: Check that the nginx configuration file is available
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/{{ nginx_config_src }}"
+      register: nginx_config_file
+      delegate_to: localhost
+      become: false
+      run_once: true
+
+    - name: Require a regular nginx configuration file
+      ansible.builtin.assert:
+        that:
+          - nginx_config_file.stat.exists
+          - nginx_config_file.stat.isreg
+        fail_msg: >-
+          Expected {{ nginx_config_src }} alongside this playbook's files
+          directory. Add the configuration file before running this job.
+      run_once: true
+
+  tasks:
+    - name: Deploy nginx configuration
+      ansible.builtin.copy:
+        src: "{{ nginx_config_src }}"
+        dest: "{{ nginx_config_dest }}"
+        owner: root
+        group: root
+        mode: "0644"
+        backup: true
+        validate: nginx -t -c %s
+      notify: Restart nginx
+
+  handlers:
+    - name: Restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
