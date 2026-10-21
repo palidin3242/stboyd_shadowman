@@ -1,0 +1,13 @@
+---
+- name: Deploy nginx config to website
+  hosts: web
+  tasks:
+    - name: template nginx config to website
+      ansible.builtin.template:
+        src: /srv/nginx/nginx.conf
+        dest: /etc/nginx/nginx.conf
+# restart nginx
+    - name: restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
